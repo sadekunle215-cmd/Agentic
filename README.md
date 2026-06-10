@@ -1,6 +1,6 @@
 # Agentic — Browser Bot System
 
-Simulates 2,000 real-looking users browsing the SimpleRead test blog.
+Simulates 20,000 real-looking users browsing the SimpleRead test blog.
 
 ## Setup
 
