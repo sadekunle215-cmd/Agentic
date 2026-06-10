@@ -4,10 +4,10 @@ import time
 
 # ── PAGES ──────────────────────────────────────────────
 PAGES = [
-    "/",
-    "/article.html",
-    "/category.html",
-    "/about.html",
+    "/SimpleRead/",
+    "/SimpleRead/article.html",
+    "/SimpleRead/category.html",
+    "/SimpleRead/about.html",
 ]
 
 # ── REAL DEVICE USER AGENTS ────────────────────────────
@@ -52,6 +52,7 @@ DEVICES = [
 REFERRERS = [
     "https://www.google.com/",
     "https://www.google.com/search?q=daily+news",
+    "https://www.google.com/search?q=world+news+today",
     "https://twitter.com/",
     "https://www.facebook.com/",
     "https://www.reddit.com/",
@@ -77,12 +78,12 @@ LANGUAGES = [
 
 
 class RealUserBot(HttpUser):
-    wait_time = between(30, 18000)  # 30 seconds to 5 hours dwell time
+    wait_time = between(30, 18000)  # 30 seconds to 5 hours
 
     def on_start(self):
-        self.device   = random.choice(DEVICES)
-        self.referrer = random.choice(REFERRERS)
-        self.language = random.choice(LANGUAGES)
+        self.device        = random.choice(DEVICES)
+        self.referrer      = random.choice(REFERRERS)
+        self.language      = random.choice(LANGUAGES)
         self.session_pages = []
 
         self.headers = {
@@ -99,12 +100,12 @@ class RealUserBot(HttpUser):
             "Cache-Control":             "max-age=0",
         }
 
-        print(f"[+] Session started — {self.device['name']} | {self.language[:5]}")
-        self._visit("/", entry=True)
+        print(f"[+] Session — {self.device['name']} | {self.language[:5]}")
+        self._visit("/SimpleRead/", entry=True)
 
     def _visit(self, page, entry=False):
         if not entry and self.session_pages:
-            self.headers["Referer"]        = self.host + self.session_pages[-1]
+            self.headers["Referer"]        = "https://sadekunle215-cmd.github.io" + self.session_pages[-1]
             self.headers["Sec-Fetch-Site"] = "same-origin"
 
         with self.client.get(page, headers=self.headers, catch_response=True, name=page) as resp:
@@ -120,22 +121,22 @@ class RealUserBot(HttpUser):
 
     @task(3)
     def read_article(self):
-        self._visit("/")
+        self._visit("/SimpleRead/")
         time.sleep(random.uniform(5, 20))
-        self._visit("/article.html")
+        self._visit("/SimpleRead/article.html")
 
     @task(2)
     def browse_category_then_article(self):
-        self._visit("/category.html")
+        self._visit("/SimpleRead/category.html")
         time.sleep(random.uniform(8, 25))
-        self._visit("/article.html")
+        self._visit("/SimpleRead/article.html")
 
     @task(1)
     def visit_about(self):
-        self._visit("/about.html")
+        self._visit("/SimpleRead/about.html")
 
     @task(1)
     def deep_session(self):
-        for page in ["/", "/category.html", "/article.html", "/about.html"]:
+        for page in ["/SimpleRead/", "/SimpleRead/category.html", "/SimpleRead/article.html", "/SimpleRead/about.html"]:
             self._visit(page)
             time.sleep(random.uniform(15, 60))
