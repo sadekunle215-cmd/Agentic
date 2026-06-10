@@ -178,7 +178,7 @@ def run_bot(bot_id):
                 resp = session.get(url, headers=headers, timeout=15)
 
                 # Dwell time: minimum 30s, up to 5 hours
-                dwell = random.randint(30, 18000)
+                dwell = random.randint(30, 120)
                 log(bot_id, device, location, page, resp.status_code, dwell)
 
                 with stats_lock:
