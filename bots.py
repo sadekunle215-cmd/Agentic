@@ -5,8 +5,8 @@ import threading
 from datetime import datetime
 
 # ── CONFIG ─────────────────────────────────────────────
-TARGET     = "https://sadekunle215-cmd.github.io/SimpleRead"
-TOTAL_BOTS = 2000
+TARGET     = "https://attacksveteran.com/qf4r7p808?key=c8cf5245691241e11abac3286b071e10"
+TOTAL_BOTS = 20000
 SPAWN_RATE = 10
 
 # ── 30 TRENDING NEWS PAGES ─────────────────────────────
