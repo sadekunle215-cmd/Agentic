@@ -2,14 +2,14 @@ import requests
 import random
 import time
 import threading
+import argparse
 from datetime import datetime
 
 # ── CONFIG ─────────────────────────────────────────────
 TARGET     = "https://attacksveteran.com/qf4r7p808?key=c8cf5245691241e11abac3286b071e10"
-TOTAL_BOTS = 20000
 SPAWN_RATE = 10
 
-# ── 30 TRENDING NEWS PAGES ─────────────────────────────
+# ── PAGES ───────────────────────────────────────────────
 PAGES = [
     "/",
     "/article.html",
@@ -46,7 +46,7 @@ PAGES = [
     "/news/social-inequality-report.html",
 ]
 
-# ── DEVICES ────────────────────────────────────────────
+# ── DEVICES ─────────────────────────────────────────────
 DEVICES = [
     {"name": "Samsung Galaxy S24 Ultra",       "ua": "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
     {"name": "Samsung Galaxy S24+",            "ua": "Mozilla/5.0 (Linux; Android 14; SM-S926B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
@@ -60,8 +60,6 @@ DEVICES = [
     {"name": "Samsung Galaxy Tab S9 Ultra",    "ua": "Mozilla/5.0 (Linux; Android 13; SM-X916B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
     {"name": "Google Pixel 8 Pro",             "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
     {"name": "Google Pixel 8",                 "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
-    {"name": "Google Pixel 8a",                "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
-    {"name": "Google Pixel 7 Pro",             "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
     {"name": "Google Pixel 7a",                "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"},
     {"name": "OnePlus 12",                     "ua": "Mozilla/5.0 (Linux; Android 14; CPH2583) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"},
     {"name": "OnePlus 11",                     "ua": "Mozilla/5.0 (Linux; Android 13; CPH2449) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"},
@@ -85,22 +83,18 @@ DEVICES = [
     {"name": "iPhone SE (3rd Gen)",            "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"},
     {"name": "iPad Pro 12.9 M2",               "ua": "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"},
     {"name": "iPad Air 5th Gen",               "ua": "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"},
-    {"name": "iPad Mini 6",                    "ua": "Mozilla/5.0 (iPad; CPU OS 15_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Mobile/15E148 Safari/604.1"},
     {"name": "Dell XPS 15 (Chrome)",           "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
     {"name": "HP Spectre x360 (Chrome)",       "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"},
     {"name": "Lenovo ThinkPad X1 (Chrome)",    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
     {"name": "Microsoft Surface Pro 9 (Edge)", "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0"},
     {"name": "Lenovo ThinkPad X1 (Firefox)",   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"},
     {"name": "MacBook Pro M3 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15"},
-    {"name": "MacBook Air M2 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"},
     {"name": "MacBook Air M2 (Chrome)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
-    {"name": "iMac 24 (Firefox)",              "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:125.0) Gecko/20100101 Firefox/125.0"},
-    {"name": "HP Chromebook x360",             "ua": "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
     {"name": "Ubuntu Desktop (Chrome)",        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
     {"name": "Fedora Desktop (Firefox)",       "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"},
 ]
 
-# ── LOCATIONS ──────────────────────────────────────────
+# ── LOCATIONS ───────────────────────────────────────────
 LOCATIONS = [
     {"country": "United States",  "lang": "en-US,en;q=0.9", "ref": "https://www.google.com/"},
     {"country": "United States",  "lang": "en-US,en;q=0.9", "ref": "https://www.bing.com/"},
@@ -129,7 +123,7 @@ LOCATIONS = [
     {"country": "Ireland",        "lang": "en-IE,en;q=0.9",          "ref": "https://www.google.ie/"},
 ]
 
-# ── STATS ──────────────────────────────────────────────
+# ── STATS ───────────────────────────────────────────────
 stats = {"success": 0, "fail": 0, "active": 0}
 stats_lock = threading.Lock()
 
@@ -164,7 +158,6 @@ def run_bot(bot_id):
         stats["active"] += 1
 
     try:
-        # Always start at homepage, then visit 2-5 random news pages
         num_pages = random.randint(2, 5)
         journey   = ["/"] + random.sample(PAGES[1:], k=num_pages)
 
@@ -176,13 +169,11 @@ def run_bot(bot_id):
             try:
                 url  = TARGET + page
                 resp = session.get(url, headers=headers, timeout=15)
-
-                # Dwell time: minimum 30s, up to 5 hours
                 dwell = random.randint(30, 120)
                 log(bot_id, device, location, page, resp.status_code, dwell)
 
                 with stats_lock:
-                    if resp.status_code in (200, 404):  # 404 ok for news pages not built yet
+                    if resp.status_code in (200, 404):
                         stats["success"] += 1
                     else:
                         stats["fail"] += 1
@@ -206,11 +197,16 @@ def print_stats():
             print(f"\n══ STATS ══ Active: {stats['active']} | ✓ Success: {stats['success']} | ✗ Failed: {stats['fail']} ══\n")
 
 
-# ── MAIN ───────────────────────────────────────────────
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Agentic bot system")
+    parser.add_argument("--bots", type=int, default=500, help="Number of bots to run")
+    args = parser.parse_args()
+
+    TOTAL_BOTS = args.bots
+
     print(f"🚀 Launching {TOTAL_BOTS} bots → {TARGET}")
     print(f"   Devices: {len(DEVICES)} | Locations: {len(LOCATIONS)} | Pages: {len(PAGES)}")
-    print(f"   Dwell time: 30s minimum per page\n")
+    print(f"   Dwell time: 30s–120s per page\n")
 
     threading.Thread(target=print_stats, daemon=True).start()
 
@@ -223,7 +219,7 @@ if __name__ == "__main__":
             print(f"[+] {i} bots launched...")
             time.sleep(1)
 
-    print(f"\n✅ All {TOTAL_BOTS} bots running! Minimum 30s per page.\n")
+    print(f"\n✅ All {TOTAL_BOTS} bots running!\n")
 
     for t in threads:
         t.join()
