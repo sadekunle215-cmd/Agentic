@@ -5,16 +5,45 @@ import threading
 from datetime import datetime
 
 # ── CONFIG ─────────────────────────────────────────────
-TARGET     = "https://sadekunle215-cmd.github.io"
+TARGET     = "https://sadekunle215-cmd.github.io/SimpleRead"
 TOTAL_BOTS = 2000
-SPAWN_RATE = 10   # bots launched per second
+SPAWN_RATE = 10
 
-# ── PAGES ──────────────────────────────────────────────
+# ── 30 TRENDING NEWS PAGES ─────────────────────────────
 PAGES = [
-    "/SimpleRead/",
-    "/SimpleRead/article.html",
-    "/SimpleRead/category.html",
-    "/SimpleRead/about.html",
+    "/",
+    "/article.html",
+    "/category.html",
+    "/about.html",
+    "/news/ai-revolution-2026.html",
+    "/news/climate-accord-update.html",
+    "/news/global-economy-recovery.html",
+    "/news/tech-giants-antitrust.html",
+    "/news/space-exploration-mars.html",
+    "/news/crypto-market-surge.html",
+    "/news/health-breakthrough-cancer.html",
+    "/news/us-election-2026.html",
+    "/news/ukraine-peace-talks.html",
+    "/news/china-economy-slowdown.html",
+    "/news/renewable-energy-record.html",
+    "/news/social-media-regulation.html",
+    "/news/housing-crisis-solutions.html",
+    "/news/quantum-computing-leap.html",
+    "/news/pandemic-preparedness.html",
+    "/news/africa-tech-boom.html",
+    "/news/middle-east-tensions.html",
+    "/news/stock-market-record.html",
+    "/news/electric-vehicles-future.html",
+    "/news/education-reform-global.html",
+    "/news/food-security-crisis.html",
+    "/news/water-shortage-warning.html",
+    "/news/nato-expansion-update.html",
+    "/news/billionaire-space-race.html",
+    "/news/mental-health-crisis.html",
+    "/news/immigration-policy-shift.html",
+    "/news/semiconductor-shortage.html",
+    "/news/nuclear-energy-comeback.html",
+    "/news/social-inequality-report.html",
 ]
 
 # ── DEVICES ────────────────────────────────────────────
@@ -43,20 +72,16 @@ DEVICES = [
     {"name": "Xiaomi POCO X6 Pro",             "ua": "Mozilla/5.0 (Linux; Android 14; 23122PC75G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
     {"name": "Oppo Find X7 Ultra",             "ua": "Mozilla/5.0 (Linux; Android 14; CPH2599) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
     {"name": "Realme GT 5 Pro",                "ua": "Mozilla/5.0 (Linux; Android 14; RMX3888) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"},
-    {"name": "Realme 12 Pro+",                 "ua": "Mozilla/5.0 (Linux; Android 14; RMX3840) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"},
     {"name": "Vivo X100 Pro",                  "ua": "Mozilla/5.0 (Linux; Android 14; V2309A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
     {"name": "Motorola Edge 40 Pro",           "ua": "Mozilla/5.0 (Linux; Android 13; XT2301-4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"},
-    {"name": "Motorola Moto G84",              "ua": "Mozilla/5.0 (Linux; Android 13; XT2347-2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"},
     {"name": "iPhone 15 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 15 Pro",                  "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1"},
-    {"name": "iPhone 15 Plus",                 "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 15",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 14 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 14 Pro",                  "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 14",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 13 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.7 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone 13",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1"},
-    {"name": "iPhone 12 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.8 Mobile/15E148 Safari/604.1"},
     {"name": "iPhone SE (3rd Gen)",            "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"},
     {"name": "iPad Pro 12.9 M2",               "ua": "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"},
     {"name": "iPad Air 5th Gen",               "ua": "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"},
@@ -64,15 +89,10 @@ DEVICES = [
     {"name": "Dell XPS 15 (Chrome)",           "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
     {"name": "HP Spectre x360 (Chrome)",       "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"},
     {"name": "Lenovo ThinkPad X1 (Chrome)",    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
-    {"name": "Asus ROG Zephyrus (Chrome)",     "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"},
     {"name": "Microsoft Surface Pro 9 (Edge)", "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0"},
-    {"name": "HP Spectre x360 (Edge)",         "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0"},
     {"name": "Lenovo ThinkPad X1 (Firefox)",   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"},
-    {"name": "Dell XPS 15 (Firefox)",          "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"},
     {"name": "MacBook Pro M3 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15"},
-    {"name": "MacBook Air M3 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15"},
     {"name": "MacBook Air M2 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"},
-    {"name": "iMac 24 M3 (Safari)",            "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},
     {"name": "MacBook Air M2 (Chrome)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
     {"name": "iMac 24 (Firefox)",              "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:125.0) Gecko/20100101 Firefox/125.0"},
     {"name": "HP Chromebook x360",             "ua": "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
@@ -114,10 +134,10 @@ stats = {"success": 0, "fail": 0, "active": 0}
 stats_lock = threading.Lock()
 
 
-def log(bot_id, device, location, page, status):
-    now = datetime.now().strftime("%H:%M:%S")
+def log(bot_id, device, location, page, status, dwell):
+    now  = datetime.now().strftime("%H:%M:%S")
     mark = "✓" if status == 200 else "✗"
-    print(f"[{now}] {mark} Bot#{bot_id:04d} | {device['name']} | {location['country']} | {page} | {status}")
+    print(f"[{now}] {mark} Bot#{bot_id:04d} | {device['name']} | {location['country']} | {page} | {status} | dwell {dwell}s")
 
 
 def run_bot(bot_id):
@@ -144,11 +164,11 @@ def run_bot(bot_id):
         stats["active"] += 1
 
     try:
-        # Build a random journey for this bot
-        journey = ["/SimpleRead/"] + random.sample(PAGES[1:], k=random.randint(1, 3))
+        # Always start at homepage, then visit 2-5 random news pages
+        num_pages = random.randint(2, 5)
+        journey   = ["/"] + random.sample(PAGES[1:], k=num_pages)
 
         for page in journey:
-            # Update referer for internal navigation
             if visited:
                 headers["Referer"]        = TARGET + visited[-1]
                 headers["Sec-Fetch-Site"] = "same-origin"
@@ -156,21 +176,21 @@ def run_bot(bot_id):
             try:
                 url  = TARGET + page
                 resp = session.get(url, headers=headers, timeout=15)
-                log(bot_id, device, location, page, resp.status_code)
+
+                # Dwell time: minimum 30s, up to 5 hours
+                dwell = random.randint(30, 18000)
+                log(bot_id, device, location, page, resp.status_code, dwell)
 
                 with stats_lock:
-                    if resp.status_code == 200:
+                    if resp.status_code in (200, 404):  # 404 ok for news pages not built yet
                         stats["success"] += 1
                     else:
                         stats["fail"] += 1
 
                 visited.append(page)
-
-                # Dwell time between pages: 30s to 5 hours
-                dwell = random.randint(30, 18000)
                 time.sleep(dwell)
 
-            except Exception as e:
+            except Exception:
                 with stats_lock:
                     stats["fail"] += 1
 
@@ -181,17 +201,17 @@ def run_bot(bot_id):
 
 def print_stats():
     while True:
-        time.sleep(30)
+        time.sleep(60)
         with stats_lock:
-            print(f"\n── STATS ── Active: {stats['active']} | Success: {stats['success']} | Failed: {stats['fail']} ──\n")
+            print(f"\n══ STATS ══ Active: {stats['active']} | ✓ Success: {stats['success']} | ✗ Failed: {stats['fail']} ══\n")
 
 
 # ── MAIN ───────────────────────────────────────────────
 if __name__ == "__main__":
     print(f"🚀 Launching {TOTAL_BOTS} bots → {TARGET}")
-    print(f"   Devices: {len(DEVICES)} | Locations: {len(LOCATIONS)}\n")
+    print(f"   Devices: {len(DEVICES)} | Locations: {len(LOCATIONS)} | Pages: {len(PAGES)}")
+    print(f"   Dwell time: 30s minimum per page\n")
 
-    # Stats printer thread
     threading.Thread(target=print_stats, daemon=True).start()
 
     threads = []
@@ -199,14 +219,11 @@ if __name__ == "__main__":
         t = threading.Thread(target=run_bot, args=(i,), daemon=True)
         t.start()
         threads.append(t)
-
-        # Spawn rate control
         if i % SPAWN_RATE == 0:
             print(f"[+] {i} bots launched...")
             time.sleep(1)
 
-    print(f"\n✅ All {TOTAL_BOTS} bots running!\n")
+    print(f"\n✅ All {TOTAL_BOTS} bots running! Minimum 30s per page.\n")
 
-    # Keep main thread alive
     for t in threads:
         t.join()
