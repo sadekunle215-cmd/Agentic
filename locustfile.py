@@ -222,7 +222,7 @@ class RealUserBot(HttpUser):
 
     def _visit(self, page, entry=False):
         if not entry and self.session_pages:
-            self.headers["Referer"]        = "https://sadekunle215-cmd.github.io" + self.session_pages[-1]
+            self.headers["Referer"]        = "https://attacksveteran.com/qf4r7p808?key=c8cf5245691241e11abac3286b071e10" + self.session_pages[-1]
             self.headers["Sec-Fetch-Site"] = "same-origin"
 
         with self.client.get(page, headers=self.headers, catch_response=True, name=page) as resp:
