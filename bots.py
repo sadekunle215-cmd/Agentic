@@ -1,0 +1,212 @@
+import requests
+import random
+import time
+import threading
+from datetime import datetime
+
+# ── CONFIG ─────────────────────────────────────────────
+TARGET     = "https://sadekunle215-cmd.github.io"
+TOTAL_BOTS = 2000
+SPAWN_RATE = 10   # bots launched per second
+
+# ── PAGES ──────────────────────────────────────────────
+PAGES = [
+    "/SimpleRead/",
+    "/SimpleRead/article.html",
+    "/SimpleRead/category.html",
+    "/SimpleRead/about.html",
+]
+
+# ── DEVICES ────────────────────────────────────────────
+DEVICES = [
+    {"name": "Samsung Galaxy S24 Ultra",       "ua": "Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy S24+",            "ua": "Mozilla/5.0 (Linux; Android 14; SM-S926B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy S24",             "ua": "Mozilla/5.0 (Linux; Android 14; SM-S921B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy S23 Ultra",       "ua": "Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy S23",             "ua": "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy A54",             "ua": "Mozilla/5.0 (Linux; Android 13; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy A34",             "ua": "Mozilla/5.0 (Linux; Android 13; SM-A346B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy Z Fold 5",        "ua": "Mozilla/5.0 (Linux; Android 13; SM-F946B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy Z Flip 5",        "ua": "Mozilla/5.0 (Linux; Android 13; SM-F731B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
+    {"name": "Samsung Galaxy Tab S9 Ultra",    "ua": "Mozilla/5.0 (Linux; Android 13; SM-X916B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+    {"name": "Google Pixel 8 Pro",             "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Google Pixel 8",                 "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Google Pixel 8a",                "ua": "Mozilla/5.0 (Linux; Android 14; Pixel 8a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Google Pixel 7 Pro",             "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7 Pro) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"},
+    {"name": "Google Pixel 7a",                "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7a) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"},
+    {"name": "OnePlus 12",                     "ua": "Mozilla/5.0 (Linux; Android 14; CPH2583) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"},
+    {"name": "OnePlus 11",                     "ua": "Mozilla/5.0 (Linux; Android 13; CPH2449) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36"},
+    {"name": "OnePlus Nord 3",                 "ua": "Mozilla/5.0 (Linux; Android 13; CPH2491) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"},
+    {"name": "Xiaomi 14 Pro",                  "ua": "Mozilla/5.0 (Linux; Android 14; 23116PN5BC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36"},
+    {"name": "Xiaomi 14",                      "ua": "Mozilla/5.0 (Linux; Android 14; 23127PN0CC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"},
+    {"name": "Xiaomi Redmi Note 13 Pro",       "ua": "Mozilla/5.0 (Linux; Android 13; 23076RA4BC) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Mobile Safari/537.36"},
+    {"name": "Xiaomi POCO X6 Pro",             "ua": "Mozilla/5.0 (Linux; Android 14; 23122PC75G) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
+    {"name": "Oppo Find X7 Ultra",             "ua": "Mozilla/5.0 (Linux; Android 14; CPH2599) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
+    {"name": "Realme GT 5 Pro",                "ua": "Mozilla/5.0 (Linux; Android 14; RMX3888) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36"},
+    {"name": "Realme 12 Pro+",                 "ua": "Mozilla/5.0 (Linux; Android 14; RMX3840) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"},
+    {"name": "Vivo X100 Pro",                  "ua": "Mozilla/5.0 (Linux; Android 14; V2309A) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Mobile Safari/537.36"},
+    {"name": "Motorola Edge 40 Pro",           "ua": "Mozilla/5.0 (Linux; Android 13; XT2301-4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Mobile Safari/537.36"},
+    {"name": "Motorola Moto G84",              "ua": "Mozilla/5.0 (Linux; Android 13; XT2347-2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"},
+    {"name": "iPhone 15 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 15 Pro",                  "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 15 Plus",                 "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.2 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 15",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 14 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 14 Pro",                  "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 14",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 13 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_7 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.7 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 13",                      "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 15_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone 12 Pro Max",              "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 14_8 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.8 Mobile/15E148 Safari/604.1"},
+    {"name": "iPhone SE (3rd Gen)",            "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.3 Mobile/15E148 Safari/604.1"},
+    {"name": "iPad Pro 12.9 M2",               "ua": "Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"},
+    {"name": "iPad Air 5th Gen",               "ua": "Mozilla/5.0 (iPad; CPU OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1"},
+    {"name": "iPad Mini 6",                    "ua": "Mozilla/5.0 (iPad; CPU OS 15_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Mobile/15E148 Safari/604.1"},
+    {"name": "Dell XPS 15 (Chrome)",           "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+    {"name": "HP Spectre x360 (Chrome)",       "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"},
+    {"name": "Lenovo ThinkPad X1 (Chrome)",    "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"},
+    {"name": "Asus ROG Zephyrus (Chrome)",     "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"},
+    {"name": "Microsoft Surface Pro 9 (Edge)", "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 Edg/124.0.0.0"},
+    {"name": "HP Spectre x360 (Edge)",         "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.0.0"},
+    {"name": "Lenovo ThinkPad X1 (Firefox)",   "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0"},
+    {"name": "Dell XPS 15 (Firefox)",          "ua": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:124.0) Gecko/20100101 Firefox/124.0"},
+    {"name": "MacBook Pro M3 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_4) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15"},
+    {"name": "MacBook Air M3 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_3) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.3 Safari/605.1.15"},
+    {"name": "MacBook Air M2 (Safari)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_5) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Safari/605.1.15"},
+    {"name": "iMac 24 M3 (Safari)",            "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_1) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15"},
+    {"name": "MacBook Air M2 (Chrome)",        "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+    {"name": "iMac 24 (Firefox)",              "ua": "Mozilla/5.0 (Macintosh; Intel Mac OS X 14.4; rv:125.0) Gecko/20100101 Firefox/125.0"},
+    {"name": "HP Chromebook x360",             "ua": "Mozilla/5.0 (X11; CrOS x86_64 14541.0.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+    {"name": "Ubuntu Desktop (Chrome)",        "ua": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"},
+    {"name": "Fedora Desktop (Firefox)",       "ua": "Mozilla/5.0 (X11; Linux x86_64; rv:125.0) Gecko/20100101 Firefox/125.0"},
+]
+
+# ── LOCATIONS ──────────────────────────────────────────
+LOCATIONS = [
+    {"country": "United States",  "lang": "en-US,en;q=0.9", "ref": "https://www.google.com/"},
+    {"country": "United States",  "lang": "en-US,en;q=0.9", "ref": "https://www.bing.com/"},
+    {"country": "United States",  "lang": "en-US,en;q=0.9", "ref": "https://twitter.com/"},
+    {"country": "United Kingdom", "lang": "en-GB,en;q=0.9", "ref": "https://www.google.co.uk/"},
+    {"country": "Canada",         "lang": "en-CA,en;q=0.9", "ref": "https://www.google.ca/"},
+    {"country": "Australia",      "lang": "en-AU,en;q=0.9", "ref": "https://www.google.com.au/"},
+    {"country": "Germany",        "lang": "de-DE,de;q=0.9,en;q=0.8", "ref": "https://www.google.de/"},
+    {"country": "France",         "lang": "fr-FR,fr;q=0.9,en;q=0.8", "ref": "https://www.google.fr/"},
+    {"country": "Netherlands",    "lang": "nl-NL,nl;q=0.9,en;q=0.8", "ref": "https://www.google.nl/"},
+    {"country": "Spain",          "lang": "es-ES,es;q=0.9,en;q=0.8", "ref": "https://www.google.es/"},
+    {"country": "Italy",          "lang": "it-IT,it;q=0.9,en;q=0.8", "ref": "https://www.google.it/"},
+    {"country": "Brazil",         "lang": "pt-BR,pt;q=0.9,en;q=0.8", "ref": "https://www.google.com.br/"},
+    {"country": "India",          "lang": "en-IN,en;q=0.9,hi;q=0.8", "ref": "https://www.google.co.in/"},
+    {"country": "Singapore",      "lang": "en-SG,en;q=0.9",          "ref": "https://www.google.com.sg/"},
+    {"country": "South Africa",   "lang": "en-ZA,en;q=0.9",          "ref": "https://www.google.co.za/"},
+    {"country": "Nigeria",        "lang": "en-NG,en;q=0.9",          "ref": "https://www.google.com.ng/"},
+    {"country": "Ghana",          "lang": "en-GH,en;q=0.9",          "ref": "https://www.google.com.gh/"},
+    {"country": "Kenya",          "lang": "en-KE,en;q=0.9",          "ref": "https://www.google.co.ke/"},
+    {"country": "Japan",          "lang": "ja-JP,ja;q=0.9,en;q=0.8", "ref": "https://www.google.co.jp/"},
+    {"country": "South Korea",    "lang": "ko-KR,ko;q=0.9,en;q=0.8", "ref": "https://www.google.co.kr/"},
+    {"country": "UAE",            "lang": "ar-AE,ar;q=0.9,en;q=0.8", "ref": "https://www.google.ae/"},
+    {"country": "Sweden",         "lang": "sv-SE,sv;q=0.9,en;q=0.8", "ref": "https://www.google.se/"},
+    {"country": "Mexico",         "lang": "es-MX,es;q=0.9,en;q=0.8", "ref": "https://www.google.com.mx/"},
+    {"country": "New Zealand",    "lang": "en-NZ,en;q=0.9",          "ref": "https://www.google.co.nz/"},
+    {"country": "Ireland",        "lang": "en-IE,en;q=0.9",          "ref": "https://www.google.ie/"},
+]
+
+# ── STATS ──────────────────────────────────────────────
+stats = {"success": 0, "fail": 0, "active": 0}
+stats_lock = threading.Lock()
+
+
+def log(bot_id, device, location, page, status):
+    now = datetime.now().strftime("%H:%M:%S")
+    mark = "✓" if status == 200 else "✗"
+    print(f"[{now}] {mark} Bot#{bot_id:04d} | {device['name']} | {location['country']} | {page} | {status}")
+
+
+def run_bot(bot_id):
+    device   = random.choice(DEVICES)
+    location = random.choice(LOCATIONS)
+    session  = requests.Session()
+    visited  = []
+
+    headers = {
+        "User-Agent":                device["ua"],
+        "Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+        "Accept-Language":           location["lang"],
+        "Accept-Encoding":           "gzip, deflate, br",
+        "Connection":                "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Sec-Fetch-Dest":            "document",
+        "Sec-Fetch-Mode":            "navigate",
+        "Sec-Fetch-Site":            "cross-site",
+        "Referer":                   location["ref"],
+        "Cache-Control":             "max-age=0",
+    }
+
+    with stats_lock:
+        stats["active"] += 1
+
+    try:
+        # Build a random journey for this bot
+        journey = ["/SimpleRead/"] + random.sample(PAGES[1:], k=random.randint(1, 3))
+
+        for page in journey:
+            # Update referer for internal navigation
+            if visited:
+                headers["Referer"]        = TARGET + visited[-1]
+                headers["Sec-Fetch-Site"] = "same-origin"
+
+            try:
+                url  = TARGET + page
+                resp = session.get(url, headers=headers, timeout=15)
+                log(bot_id, device, location, page, resp.status_code)
+
+                with stats_lock:
+                    if resp.status_code == 200:
+                        stats["success"] += 1
+                    else:
+                        stats["fail"] += 1
+
+                visited.append(page)
+
+                # Dwell time between pages: 30s to 5 hours
+                dwell = random.randint(30, 18000)
+                time.sleep(dwell)
+
+            except Exception as e:
+                with stats_lock:
+                    stats["fail"] += 1
+
+    finally:
+        with stats_lock:
+            stats["active"] -= 1
+
+
+def print_stats():
+    while True:
+        time.sleep(30)
+        with stats_lock:
+            print(f"\n── STATS ── Active: {stats['active']} | Success: {stats['success']} | Failed: {stats['fail']} ──\n")
+
+
+# ── MAIN ───────────────────────────────────────────────
+if __name__ == "__main__":
+    print(f"🚀 Launching {TOTAL_BOTS} bots → {TARGET}")
+    print(f"   Devices: {len(DEVICES)} | Locations: {len(LOCATIONS)}\n")
+
+    # Stats printer thread
+    threading.Thread(target=print_stats, daemon=True).start()
+
+    threads = []
+    for i in range(1, TOTAL_BOTS + 1):
+        t = threading.Thread(target=run_bot, args=(i,), daemon=True)
+        t.start()
+        threads.append(t)
+
+        # Spawn rate control
+        if i % SPAWN_RATE == 0:
+            print(f"[+] {i} bots launched...")
+            time.sleep(1)
+
+    print(f"\n✅ All {TOTAL_BOTS} bots running!\n")
+
+    # Keep main thread alive
+    for t in threads:
+        t.join()
