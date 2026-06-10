@@ -123,22 +123,44 @@ LOCATIONS = [
     {"country": "Ireland",        "lang": "en-IE,en;q=0.9",          "ref": "https://www.google.ie/"},
 ]
 
+# ── PROXY LOADER ────────────────────────────────────────
+def load_proxies(filepath):
+    proxies = []
+    try:
+        with open(filepath, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    # Support formats: ip:port or http://ip:port
+                    if not line.startswith("http"):
+                        line = f"http://{line}"
+                    proxies.append({"http": line, "https": line})
+        print(f"[+] Loaded {len(proxies)} proxies from {filepath}")
+    except FileNotFoundError:
+        print(f"[!] Proxy file '{filepath}' not found — running without proxies")
+    return proxies
+
 # ── STATS ───────────────────────────────────────────────
-stats = {"success": 0, "fail": 0, "active": 0}
+stats = {"success": 0, "fail": 0, "active": 0, "proxy_fail": 0}
 stats_lock = threading.Lock()
 
 
-def log(bot_id, device, location, page, status, dwell):
+def log(bot_id, device, location, page, status, dwell, proxy=""):
     now  = datetime.now().strftime("%H:%M:%S")
     mark = "✓" if status == 200 else "✗"
-    print(f"[{now}] {mark} Bot#{bot_id:04d} | {device['name']} | {location['country']} | {page} | {status} | dwell {dwell}s")
+    proxy_info = f" | proxy: {proxy}" if proxy else ""
+    print(f"[{now}] {mark} Bot#{bot_id:04d} | {device['name']} | {location['country']} | {page} | {status} | dwell {dwell}s{proxy_info}")
 
 
-def run_bot(bot_id):
+def run_bot(bot_id, proxies):
     device   = random.choice(DEVICES)
     location = random.choice(LOCATIONS)
     session  = requests.Session()
     visited  = []
+
+    # Pick a random proxy if available
+    proxy = random.choice(proxies) if proxies else None
+    proxy_label = proxy["http"].replace("http://", "") if proxy else "no proxy"
 
     headers = {
         "User-Agent":                device["ua"],
@@ -168,9 +190,14 @@ def run_bot(bot_id):
 
             try:
                 url  = TARGET + page
-                resp = session.get(url, headers=headers, timeout=15)
+                resp = session.get(
+                    url,
+                    headers=headers,
+                    proxies=proxy,
+                    timeout=15
+                )
                 dwell = random.randint(30, 120)
-                log(bot_id, device, location, page, resp.status_code, dwell)
+                log(bot_id, device, location, page, resp.status_code, dwell, proxy_label)
 
                 with stats_lock:
                     if resp.status_code in (200, 404):
@@ -181,6 +208,12 @@ def run_bot(bot_id):
                 visited.append(page)
                 time.sleep(dwell)
 
+            except requests.exceptions.ProxyError:
+                with stats_lock:
+                    stats["proxy_fail"] += 1
+                # Try a different proxy on failure
+                if proxies:
+                    proxy = random.choice(proxies)
             except Exception:
                 with stats_lock:
                     stats["fail"] += 1
@@ -194,32 +227,33 @@ def print_stats():
     while True:
         time.sleep(60)
         with stats_lock:
-            print(f"\n══ STATS ══ Active: {stats['active']} | ✓ Success: {stats['success']} | ✗ Failed: {stats['fail']} ══\n")
+            print(f"\n══ STATS ══ Active: {stats['active']} | ✓ {stats['success']} | ✗ {stats['fail']} | Proxy fails: {stats['proxy_fail']} ══\n")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Agentic bot system")
-    parser.add_argument("--bots", type=int, default=500, help="Number of bots to run")
+    parser.add_argument("--bots",    type=int, default=500,  help="Number of bots to run")
+    parser.add_argument("--proxies", type=str, default="",   help="Path to proxy list file (ip:port per line)")
     args = parser.parse_args()
 
-    TOTAL_BOTS = args.bots
+    proxies = load_proxies(args.proxies) if args.proxies else []
 
-    print(f"🚀 Launching {TOTAL_BOTS} bots → {TARGET}")
+    print(f"🚀 Launching {args.bots} bots → {TARGET}")
     print(f"   Devices: {len(DEVICES)} | Locations: {len(LOCATIONS)} | Pages: {len(PAGES)}")
-    print(f"   Dwell time: 30s–120s per page\n")
+    print(f"   Proxies: {len(proxies)} loaded | Dwell: 30s–120s\n")
 
     threading.Thread(target=print_stats, daemon=True).start()
 
     threads = []
-    for i in range(1, TOTAL_BOTS + 1):
-        t = threading.Thread(target=run_bot, args=(i,), daemon=True)
+    for i in range(1, args.bots + 1):
+        t = threading.Thread(target=run_bot, args=(i, proxies), daemon=True)
         t.start()
         threads.append(t)
         if i % SPAWN_RATE == 0:
             print(f"[+] {i} bots launched...")
             time.sleep(1)
 
-    print(f"\n✅ All {TOTAL_BOTS} bots running!\n")
+    print(f"\n✅ All {args.bots} bots running!\n")
 
     for t in threads:
         t.join()
